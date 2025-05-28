@@ -1,4 +1,4 @@
-import { FC, SyntheticEvent, useState } from 'react';
+import { FC, SyntheticEvent } from 'react';
 import { LoginUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
 import {
@@ -6,34 +6,46 @@ import {
   selectIsAuthenticated
 } from '../../services/slices/UserSlice';
 import { Navigate } from 'react-router-dom';
+import { useForm } from '../../hooks/useForm';
+
+type LoginFormValues = { email: string; password: string };
 
 export const Login: FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
+  const { values, setValues } = useForm<LoginFormValues>({
+    email: '',
+    password: ''
+  });
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
+  const setEmail: React.Dispatch<React.SetStateAction<string>> = (value) =>
+    setValues((prev) => {
+      const nextEmail = typeof value === 'function' ? value(prev.email) : value;
+      return { ...prev, email: nextEmail };
+    });
+
+  const setPassword: React.Dispatch<React.SetStateAction<string>> = (value) =>
+    setValues((prev) => {
+      const nextPass =
+        typeof value === 'function' ? value(prev.password) : value;
+      return { ...prev, password: nextPass };
+    });
+
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-
-    const userLoginData = {
-      email: email,
-      password: password
-    };
-    dispatch(logInUser(userLoginData));
+    dispatch(logInUser(values));
   };
 
   if (isAuthenticated) {
-    return <Navigate to={'/'} />;
+    return <Navigate to='/' />;
   }
 
   return (
     <LoginUI
       errorText=''
-      email={email}
+      email={values.email}
       setEmail={setEmail}
-      password={password}
+      password={values.password}
       setPassword={setPassword}
       handleSubmit={handleSubmit}
     />

@@ -1,6 +1,6 @@
 import { Preloader } from '@ui';
 import React, { ReactHTMLElement } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'store.ts';
 import { Navigate, useLocation } from 'react-router-dom';
 import {
   selectIsAuthChecked,

@@ -13,21 +13,22 @@ describe('Проверка конструктора: ингредиенты', ()
   beforeEach(() => {
     cy.intercept('GET', '/api/ingredients', { fixture: 'ingredients.json' });
     cy.visit('/');
+
+    cy.get(SELECTORS.MAIN_CONSTRUCTOR).as('constructor');
   });
 
   it('Конструктор пуст после загрузки страницы', () => {
     cy.get(SELECTORS.BUN_TOP).should('not.exist');
     cy.get(SELECTORS.BUN_BOTTOM).should('not.exist');
 
-    cy.get(SELECTORS.MAIN_CONSTRUCTOR)
-      .find('li')
-      .should('have.length', 0);
-    
+    cy.get('@constructor').find('li').should('have.length', 0);
   });
 
   it('Булка устанавливается в конструктор как верх и низ', () => {
     const bunId = '643d69a5c3f7b9001cfa093c';
     const bunLabel = 'Краторная булка N-200i';
+
+    cy.get(SELECTORS.INGREDIENT(bunId)).as('bunCard');
 
     cy.get(SELECTORS.BUN_INGREDIENTS)
       .should('be.visible')
@@ -36,53 +37,49 @@ describe('Проверка конструктора: ингредиенты', ()
     cy.get(SELECTORS.BUN_TOP).should('not.exist');
     cy.get(SELECTORS.BUN_BOTTOM).should('not.exist');
 
-    cy.get(SELECTORS.INGREDIENT(bunId))
-      .should('be.visible')
-      .within(() => cy.contains('Добавить').click());
+    cy.get('@bunCard').within(() => cy.contains('Добавить').click());
 
-    cy.get(SELECTORS.BUN_TOP)
-      .should('contain.text', bunLabel);
-
-    cy.get(SELECTORS.BUN_BOTTOM)
-      .should('contain.text', bunLabel);
+    cy.get(SELECTORS.BUN_TOP).should('contain.text', bunLabel);
+    cy.get(SELECTORS.BUN_BOTTOM).should('contain.text', bunLabel);
   });
 
   it('Добавление одного ингредиента из блока начинок', () => {
     const id = '643d69a5c3f7b9001cfa0941';
     const label = 'Биокотлета из марсианской Магнолии';
 
+    cy.get(SELECTORS.INGREDIENT(id)).as('fillingCard');
+
     cy.get(SELECTORS.MAIN_INGREDIENTS)
       .scrollIntoView()
       .should('exist')
       .and('contain.text', label);
 
-    cy.get(SELECTORS.MAIN_CONSTRUCTOR)
-      .should('not.include.text', label);
+    cy.get('@constructor').should('not.contain.text', label);
 
-    cy.get(SELECTORS.INGREDIENT(id))
+    cy.get('@fillingCard')
       .scrollIntoView()
       .contains('Добавить')
       .click();
 
-    cy.get(SELECTORS.MAIN_CONSTRUCTOR)
-      .should('contain.text', label);
+    cy.get('@constructor').should('contain.text', label);
   });
 
   it('Добавление одинаковых начинок дважды', () => {
     const targetId = '643d69a5c3f7b9001cfa0941';
     const text = 'Биокотлета из марсианской Магнолии';
 
-    cy.get(SELECTORS.MAIN_CONSTRUCTOR)
-      .should('not.contain.text', text);
+    cy.get('@constructor').should('not.contain.text', text);
 
-    Array.from({ length: 2 }).forEach(() => {
-      cy.get(SELECTORS.INGREDIENT(targetId))
+    cy.get(SELECTORS.INGREDIENT(targetId)).as('filling');
+
+    for (let i = 0; i < 2; i++) {
+      cy.get('@filling')
         .scrollIntoView()
         .contains('Добавить')
         .click();
-    });
+    }
 
-    cy.get(SELECTORS.MAIN_CONSTRUCTOR)
+    cy.get('@constructor')
       .find('li')
       .filter(`:contains("${text}")`)
       .should('have.length', 2);

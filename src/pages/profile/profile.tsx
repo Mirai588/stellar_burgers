@@ -1,7 +1,7 @@
 import { ProfileUI } from '@ui-pages';
 import { TUser } from '@utils-types';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'store.ts';
 import {
   selectLoginUserRequest,
   selectUser,

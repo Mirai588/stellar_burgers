@@ -4,7 +4,7 @@ import { BurgerConstructorUI } from '@ui';
 
 import { useDispatch } from '../../services/store';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'store.ts';
 import {
   clearOrder,
   createOrder,
